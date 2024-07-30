@@ -1,41 +1,26 @@
-const assert = require('assert').strict;
+const { ObjectId } = require('mongodb');
 
-exports.insertDocument = (db, document, collection, callback) => {
+exports.insertDocument = (db, document, collection) => {
     const coll = db.collection(collection);
-    coll.insertOne(document, (err, result) => {
-        assert.strictEqual(err, undefined);
-        callback(result);
-    });
+    return coll.insertOne(document);
 };
 
-exports.findDocuments = (db, collection, callback) => {
+exports.findDocuments = (db, collection) => {
     const coll = db.collection(collection);
-    coll.find().toArray((err, docs) => {
-        assert.strictEqual(err, undefined);
-        callback(docs);
-    });
+    return coll.find({}).toArray();
 };
 
-exports.findDocumentById = (db, id, collection, callback) => {
+exports.findDocumentById = (db, id, collection) => {
     const coll = db.collection(collection);
-    coll.findOne({ _id: id }, (err, doc) => {
-        assert.strictEqual(err, undefined);
-        callback(doc);
-    });
+    return coll.findOne({ _id: new ObjectId(id) });
 };
 
-exports.removeDocument = (db, document, collection, callback) => {
+exports.removeDocument = (db, document, collection) => {
     const coll = db.collection(collection);
-    coll.deleteOne(document, (err, result) => {
-        assert.strictEqual(err, undefined);
-        callback(result);
-    });
+    return coll.deleteOne(document);
 };
 
-exports.updateDocument = (db, document, update, collection, callback) => {
+exports.updateDocument = (db, document, update, collection) => {
     const coll = db.collection(collection);
-    coll.updateOne(document, { $set: update }, null, (err, result) => {
-        assert.strictEqual(err, undefined);
-        callback(result);
-    });
+    return coll.updateOne(document, { $set: update });
 };
