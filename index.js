@@ -1,5 +1,6 @@
 const { MongoClient } = require('mongodb-legacy');
 const assert = require('assert');
+const dboper = require('./operations');
 
 const url = 'mongodb://localhost:27017/';
 const dbName = 'nucampsite';
@@ -13,26 +14,39 @@ MongoClient.connect(url, {}, (err, client) => {
 
     db.dropCollection('campsites', (err, result) => {
         assert.strictEqual(err, undefined);
+        console.log('Dropped Collection:', result);
 
-        console.log('Dropped Collection', result);
+        dboper.insertDocument(db, { name: "Breadcrumb Trail Campground", description: "Test" },
+            'campsites', result => {
+                console.log('Insert Document ID:', result.insertedId);
 
-        const collection = db.collection('campsites');
+                // Fetch the inserted document by its ID
+                dboper.findDocumentById(db, result.insertedId, 'campsites', doc => {
+                    console.log('Inserted Document:', doc);
 
-        collection.insertOne(
-            { name: 'Breadcrumb Trail Campground', description: 'Test' },
-            (err, result) => {
-                assert.strictEqual(err, undefined);
+                    dboper.findDocuments(db, 'campsites', docs => {
+                        console.log('Found Documents:', docs);
 
-                console.log('Insert Document:', result.ops);
+                        dboper.updateDocument(db, { name: "Breadcrumb Trail Campground" },
+                            { description: "Updated Test Description" }, 'campsites',
+                            result => {
+                                console.log('Updated Document Count:', result.modifiedCount);
 
-                collection.find().toArray((err, docs) => {
-                    assert.strictEqual(err, undefined);
+                                dboper.findDocuments(db, 'campsites', docs => {
+                                    console.log('Found Documents:', docs);
 
-                    console.log('Found Documents:', docs);
+                                    dboper.removeDocument(db, { name: "Breadcrumb Trail Campground" },
+                                        'campsites', result => {
+                                            console.log('Deleted Document Count:', result.deletedCount);
 
-                    client.close();
+                                            client.close();
+                                        }
+                                    );
+                                });
+                            }
+                        );
+                    });
                 });
-            },
-        );
+            });
     });
 });
